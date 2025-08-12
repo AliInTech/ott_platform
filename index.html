@@ -1,338 +1,244 @@
-import React, { useState, useEffect } from 'react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieFlix - A Netflix Clone</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom scrollbar for better aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #141414;
+            color: #e5e5e5;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none; /* for Chrome, Safari, and Opera */
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* for IE and Edge */
+            scrollbar-width: none;  /* for Firefox */
+        }
+        .hero-gradient {
+            background-image: linear-gradient(to top, #141414 10%, transparent 50%);
+        }
+        .card-transform {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card-transform:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+        }
+    </style>
+</head>
+<body class="bg-black">
 
-// Mock movie data for demonstration
-const mockMovies = [
-  { id: 1, title: 'The Silent Sea', imageUrl: 'https://placehold.co/300x450/1C1C1C/F8F8F8?text=Silent+Sea' }, // Added placeholder URL
-  { id: 2, title: 'Beyond the Stars', imageUrl: 'https://placehold.co/300x450/252525/E0E0E0?text=Beyond+Stars' },
-  { id: 3, title: 'Lost in Translation', imageUrl: 'https://placehold.co/300x450/2E2E2E/D1D1D1?text=Lost+in+Translation' },
-  { id: 4, title: 'City of Echoes', imageUrl: 'https://placehold.co/300x450/373737/C2C2C2?text=City+of+Echoes' },
-  { id: 5, title: 'Whispering Pines', imageUrl: 'https://placehold.co/300x450/404040/B3B3B3?text=Whispering+Pines' },
-  { id: 6, title: 'The Last Horizon', imageUrl: 'https://placehold.co/300x450/494949/A4A4A4?text=Last+Horizon' },
-  { id: 7, title: 'Midnight Mirage', imageUrl: 'https://placehold.co/300x450/525252/959595?text=Midnight+Mirage' },
-  { id: 8, title: 'Forgotten Realms', imageUrl: 'https://placehold.co/300x450/5B5B5B/868686?text=Forgotten+Realms' },
-  { id: 9, title: 'The Golden Compass', imageUrl: 'https://placehold.co/300x450/646464/777777?text=Golden+Compass' },
-  { id: 10, title: 'Ocean\'s Depth', imageUrl: 'https://placehold.co/300x450/6D6D6D/686868?text=Ocean\'s+Depth' },
-];
-
-// Reusable MovieCard Component with enhanced hover effects
-const MovieCard = ({ movie }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
-  return (
-    <div
-      className="flex-shrink-0 w-48 h-auto rounded-lg overflow-hidden relative cursor-pointer shadow-xl
-                 transform transition-transform duration-300 group hover:scale-105 hover:z-10"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      aria-label={`Watch ${movie.title}`}
-    >
-      <img
-        src={movie.imageUrl}
-        alt={movie.title}
-        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/300x450/222222/DDDDDD?text=Image+Error"; }}
-      />
-      {/* Overlay visible on hover */}
-      <div className={`absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center p-2 text-center
-                       transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
-        {/* Play Icon */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="56"
-          height="56"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          className="text-red-500 mb-2 transform group-hover:scale-110 transition-transform duration-200"
-        >
-          <polygon points="5 3 19 12 5 21 5 3"/>
-        </svg>
-        <p className="text-white text-lg font-semibold truncate w-full px-1">{movie.title}</p>
-      </div>
-      {/* Movie title always visible at the bottom, even without hover */}
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent p-2">
-        <p className="text-sm font-medium truncate text-white">{movie.title}</p>
-      </div>
-    </div>
-  );
-};
-
-// Main App component for MOVIEFLIX
-function App() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  // Simulate progress for the "Now Playing" bar
-  useEffect(() => {
-    let interval;
-    if (isPlaying) {
-      interval = setInterval(() => {
-        setProgress((prev) => (prev >= 100 ? 0 : prev + 0.5)); // Slower, smoother progress
-      }, 100); // Faster updates for smoother animation
-    } else {
-      clearInterval(interval);
-      setProgress(0); // Reset progress when paused
-    }
-    return () => clearInterval(interval);
-  }, [isPlaying]);
-
-  return (
-    <div className="min-h-screen bg-gray-950 text-white font-inter">
-      {/* Navigation Bar - fixed at top, slightly transparent to show content underneath */}
-      <nav className="fixed top-0 w-full z-50 p-4 bg-gradient-to-b from-black to-transparent flex items-center justify-between transition-all duration-300">
-        {/* Logo */}
-        <div className="flex items-center space-x-4 md:space-x-8">
-          <h1 className="text-red-600 text-3xl md:text-4xl font-extrabold cursor-pointer tracking-wider">MOVIEFLIX</h1>
-          {/* Nav Links (hidden on small screens, shown on md and above) */}
-          <ul className="hidden md:flex space-x-6 text-lg font-medium">
-            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">Home</a></li>
-            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">TV Shows</a></li>
-            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">Movies</a></li>
-            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">New & Popular</a></li>
-            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">My List</a></li>
-          </ul>
-        </div>
-        {/* User Actions */}
-        <div className="flex items-center space-x-3 md:space-x-4 text-lg md:text-xl">
-          {/* Search Icon */}
-          <button type="button" className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="Search">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-search"
-            >
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
-            </svg>
-          </button>
-          {/* User Profile Icon */}
-          <button type="button" className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="User Profile">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-user-circle"
-            >
-              <circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>
-            </svg>
-          </button>
-        </div>
-      </nav>
-
-      {/* Hero Section (Banner) */}
-      <header className="relative w-full h-screen flex items-end pb-20 p-8 md:p-16">
-        {/* Background Image/Video Placeholder - now just a solid background */}
-        <img
-          src="https://placehold.co/1920x1080/000000/FFFFFF"
-          alt="Featured Movie Banner Background"
-          className="absolute inset-0 w-full h-full object-cover z-0"
-          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/1920x1080/000000/FFFFFF?text=Banner+Load+Error"; }}
-        />
-        {/* Gradient Overlay for Text Readability and depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/20 to-transparent z-10"></div>
-        <div className="relative z-20 max-w-lg md:max-w-xl lg:max-w-3xl animate-fadeInUp"> {/* Added animation */}
-          <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-4 drop-shadow-lg leading-tight">
-            The MOVIEFLIX Experience
-          </h2>
-          <p className="text-base md:text-xl mb-8 drop-shadow-md text-gray-200">
-            Dive into an endless library of captivating movies and thrilling TV shows. Enjoy personalized recommendations and seamless streaming, all in one cinematic place.
-          </p>
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <button type="button" className="flex items-center justify-center bg-white text-gray-900 px-7 py-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all duration-300 shadow-xl transform hover:scale-105 group">
-              {/* Play Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="mr-2 text-gray-900 group-hover:text-gray-700 transition-colors"
-              >
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              Play
-            </button>
-            <button type="button" className="flex items-center justify-center bg-gray-700 bg-opacity-70 text-white px-7 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 shadow-xl transform hover:scale-105 group">
-              {/* Info Icon */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2 lucide lucide-info text-white group-hover:text-gray-200 transition-colors"
-              >
-                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
-              </svg>
-              More Info
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Movie Rows */}
-      <main className="relative z-30 -mt-24 px-4 md:px-16 pb-24">
-        {/* Row 1: Trending Now */}
-        <section className="mb-12">
-          <h3 className="text-xl md:text-2xl font-bold mb-4 pl-2">Trending Now</h3>
-          <div className="flex overflow-x-scroll scrollbar-hide space-x-4 md:space-x-6 pb-4 pt-2">
-            {mockMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </section>
-
-        {/* Row 2: Popular on MOVIEFLIX */}
-        <section className="mb-12">
-          <h3 className="text-xl md:text-2xl font-bold mb-4 pl-2">Popular on MOVIEFLIX</h3>
-          <div className="flex overflow-x-scroll scrollbar-hide space-x-4 md:space-x-6 pb-4 pt-2">
-            {mockMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </section>
-
-        {/* Row 3: MOVIEFLIX Originals */}
-        <section className="mb-12">
-          <h3 className="text-xl md:text-2xl font-bold mb-4 pl-2">MOVIEFLIX Originals</h3>
-          <div className="flex overflow-x-scroll scrollbar-hide space-x-4 md:space-x-6 pb-4 pt-2">
-            {mockMovies.map((movie) => (
-              <MovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </section>
-
-        {/* Add more sections as needed */}
-      </main>
-
-      {/* Now Playing Bar (Music Animation Simulation) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 bg-opacity-95 p-4 flex items-center justify-between shadow-2xl z-50">
-        <div className="flex items-center space-x-4 flex-grow min-w-0">
-          <img
-            src="https://placehold.co/60x60/444444/FFFFFF?text=Current"
-            alt="Now Playing Thumbnail"
-            className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-          />
-          <div className="flex flex-col justify-center flex-grow min-w-0">
-            <p className="text-sm font-semibold truncate">Playing: The Silent Sea</p>
-            <div className="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
-              <div
-                className="bg-red-600 h-1.5 rounded-full transition-all duration-100 linear" // Smoother progress bar
-                style={{ width: `${progress}%` }}
-              ></div>
+    <!-- Header Navigation -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-4 sm:px-8 md:px-16 py-4 transition-colors duration-300 bg-black bg-opacity-80 backdrop-blur-sm">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl md:text-3xl font-extrabold text-red-600">MovieFlix</h1>
+                <nav class="hidden lg:flex items-center space-x-4">
+                    <a href="#" class="text-white font-semibold hover:text-gray-300">Home</a>
+                    <a href="#" class="text-white hover:text-gray-300">TV Shows</a>
+                    <a href="#" class="text-white hover:text-gray-300">Movies</a>
+                    <a href="#" class="text-white hover:text-gray-300">New & Popular</a>
+                    <a href="#" class="text-white hover:text-gray-300">My List</a>
+                </nav>
             </div>
-          </div>
+            <div class="flex items-center space-x-4">
+                <!-- Search Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <!-- Bell Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <!-- Profile Avatar -->
+                <div class="w-8 h-8 bg-blue-500 rounded-md overflow-hidden cursor-pointer">
+                    <!-- Add Profile Picture Here -->
+                    <img src="https://placehold.co/32x32/3B82F6/FFFFFF?text=LA" alt="Profile" class="w-full h-full object-cover">
+                </div>
+            </div>
         </div>
-        <div className="flex items-center space-x-4 ml-4">
-          <button
-            type="button"
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="text-white hover:text-red-500 transition-colors duration-200"
-            aria-label={isPlaying ? "Pause Playback" : "Resume Playback"}
-          >
-            {isPlaying ? (
-              // Pause Icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <rect width="6" height="16" x="4" y="4" rx="1"/><rect width="6" height="16" x="14" y="4" rx="1"/>
-              </svg>
-            ) : (
-              // Play Icon
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="28"
-                height="28"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-            )}
-          </button>
-          {/* Volume Icon */}
-          <button type="button" className="text-white hover:text-red-500 transition-colors duration-200 hidden sm:block" aria-label="Volume Control">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-volume-2"
-            >
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M23.31 1.69a16 16 0 0 1 0 20.62"/>
-            </svg>
-          </button>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="relative h-[50vh] md:h-[85vh] w-full flex items-center justify-start text-white">
+            <div class="absolute top-0 left-0 w-full h-full z-0">
+                <!-- Add Featured Movie Background Image Here -->
+                <img src="https://placehold.co/1920x1080/000000/FFFFFF?text=Featured+Movie+Banner" alt="Featured Movie" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-black bg-opacity-50 hero-gradient"></div>
+            </div>
+            <div class="relative z-10 p-4 sm:p-8 md:p-16 max-w-xl">
+                <h2 class="text-4xl md:text-6xl font-extrabold mb-4">Featured Movie Title</h2>
+                <p class="text-base md:text-lg mb-6">
+                    This is a compelling description of the featured movie. It's exciting, dramatic, and will make you want to watch it right away. Explore a world of adventure and suspense.
+                </p>
+                <div class="flex space-x-4">
+                    <button class="flex items-center bg-white text-black font-bold py-2 px-6 rounded hover:bg-gray-200 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                        </svg>
+                        Play
+                    </button>
+                    <button class="flex items-center bg-gray-700 bg-opacity-80 text-white font-bold py-2 px-6 rounded hover:bg-gray-600 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        More Info
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Movie Carousels -->
+        <div class="py-8 px-4 sm:px-8 md:px-16 space-y-12">
+
+            <!-- Category: Trending Now -->
+            <section>
+                <h3 class="text-xl md:text-2xl font-bold mb-4">Trending Now</h3>
+                <div class="relative">
+                    <div class="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+                        <!-- Movie Card 1 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/1F2937/FFFFFF?text=Movie+1" alt="Movie 1" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 2 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/1F2937/FFFFFF?text=Movie+2" alt="Movie 2" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 3 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/1F2937/FFFFFF?text=Movie+3" alt="Movie 3" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 4 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                           <img src="https://placehold.co/240x360/1F2937/FFFFFF?text=Movie+4" alt="Movie 4" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 5 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/1F2937/FFFFFF?text=Movie+5" alt="Movie 5" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Add more cards as needed -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Category: New Releases -->
+            <section>
+                <h3 class="text-xl md:text-2xl font-bold mb-4">New Releases</h3>
+                <div class="relative">
+                    <div class="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+                        <!-- Movie Card 1 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/374151/FFFFFF?text=Release+1" alt="Release 1" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 2 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/374151/FFFFFF?text=Release+2" alt="Release 2" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 3 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/374151/FFFFFF?text=Release+3" alt="Release 3" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 4 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/374151/FFFFFF?text=Release+4" alt="Release 4" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Add more cards as needed -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Category: Action & Adventure -->
+            <section>
+                <h3 class="text-xl md:text-2xl font-bold mb-4">Action & Adventure</h3>
+                <div class="relative">
+                    <div class="flex space-x-4 overflow-x-auto pb-4 hide-scrollbar">
+                        <!-- Movie Card 1 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/4B5563/FFFFFF?text=Action+1" alt="Action 1" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 2 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/4B5563/FFFFFF?text=Action+2" alt="Action 2" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Movie Card 3 -->
+                        <div class="flex-shrink-0 w-40 md:w-60 bg-gray-800 rounded-lg overflow-hidden card-transform cursor-pointer">
+                            <!-- Add Movie Poster Here -->
+                            <img src="https://placehold.co/240x360/4B5563/FFFFFF?text=Action+3" alt="Action 3" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Add more cards as needed -->
+                    </div>
+                </div>
+            </section>
+
         </div>
-      </div>
+    </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-950 p-8 text-center text-gray-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} MOVIEFLIX. All Rights Reserved. This is a clone for educational purposes only.</p>
-        <p className="mt-2">Inspired by Netflix. Layout and design by Laraib Ali (as per request for copyright attribution).</p>
-      </footer>
+    <!-- Footer -->
+    <footer class="mt-16 py-8 px-4 sm:px-8 md:px-16 border-t border-gray-800">
+        <div class="container mx-auto text-gray-400">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h4 class="font-bold mb-2">Questions? Contact us.</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:underline">FAQ</a></li>
+                        <li><a href="#" class="hover:underline">Investor Relations</a></li>
+                        <li><a href="#" class="hover:underline">Privacy</a></li>
+                        <li><a href="#" class="hover:underline">Speed Test</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2 invisible md:visible">&nbsp;</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:underline">Help Center</a></li>
+                        <li><a href="#" class="hover:underline">Jobs</a></li>
+                        <li><a href="#" class="hover:underline">Cookie Preferences</a></li>
+                        <li><a href="#" class="hover:underline">Legal Notices</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2 invisible md:visible">&nbsp;</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:underline">Account</a></li>
+                        <li><a href="#" class="hover:underline">Ways to Watch</a></li>
+                        <li><a href="#" class="hover:underline">Corporate Information</a></li>
+                        <li><a href="#" class="hover:underline">Only on MovieFlix</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-2 invisible md:visible">&nbsp;</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:underline">Media Center</a></li>
+                        <li><a href="#" class="hover:underline">Terms of Use</a></li>
+                        <li><a href="#" class="hover:underline">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <p class="text-center text-sm">&copy; 2024 MovieFlix by Laraib Ali</p>
+        </div>
+    </footer>
 
-      {/* Custom CSS for scrollbar hiding and animations */}
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
-        @keyframes fadeInDown {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeInDown {
-          animation: fadeInDown 0.8s ease-out forwards;
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 1s ease-out forwards;
-        }
-      `}</style>
-    </div>
-  );
-}
-
-export default App;
+</body>
+</html>
