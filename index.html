@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 // Mock movie data for demonstration
 const mockMovies = [
-  { id: 1, title: 'The Silent Sea', imageUrl: '' },
+  { id: 1, title: 'The Silent Sea', imageUrl: 'https://placehold.co/300x450/1C1C1C/F8F8F8?text=Silent+Sea' }, // Added placeholder URL
   { id: 2, title: 'Beyond the Stars', imageUrl: 'https://placehold.co/300x450/252525/E0E0E0?text=Beyond+Stars' },
   { id: 3, title: 'Lost in Translation', imageUrl: 'https://placehold.co/300x450/2E2E2E/D1D1D1?text=Lost+in+Translation' },
   { id: 4, title: 'City of Echoes', imageUrl: 'https://placehold.co/300x450/373737/C2C2C2?text=City+of+Echoes' },
@@ -94,7 +94,7 @@ function App() {
         {/* User Actions */}
         <div className="flex items-center space-x-3 md:space-x-4 text-lg md:text-xl">
           {/* Search Icon */}
-          <button className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="Search">
+          <button type="button" className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="Search">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -111,7 +111,7 @@ function App() {
             </svg>
           </button>
           {/* User Profile Icon */}
-          <button className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="User Profile">
+          <button type="button" className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="User Profile">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -149,7 +149,7 @@ function App() {
             Dive into an endless library of captivating movies and thrilling TV shows. Enjoy personalized recommendations and seamless streaming, all in one cinematic place.
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-            <button className="flex items-center justify-center bg-white text-gray-900 px-7 py-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all duration-300 shadow-xl transform hover:scale-105 group">
+            <button type="button" className="flex items-center justify-center bg-white text-gray-900 px-7 py-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all duration-300 shadow-xl transform hover:scale-105 group">
               {/* Play Icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +163,7 @@ function App() {
               </svg>
               Play
             </button>
-            <button className="flex items-center justify-center bg-gray-700 bg-opacity-70 text-white px-7 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 shadow-xl transform hover:scale-105 group">
+            <button type="button" className="flex items-center justify-center bg-gray-700 bg-opacity-70 text-white px-7 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 shadow-xl transform hover:scale-105 group">
               {/* Info Icon */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -240,6 +240,7 @@ function App() {
         </div>
         <div className="flex items-center space-x-4 ml-4">
           <button
+            type="button"
             onClick={() => setIsPlaying(!isPlaying)}
             className="text-white hover:text-red-500 transition-colors duration-200"
             aria-label={isPlaying ? "Pause Playback" : "Resume Playback"}
@@ -269,7 +270,7 @@ function App() {
             )}
           </button>
           {/* Volume Icon */}
-          <button className="text-white hover:text-red-500 transition-colors duration-200 hidden sm:block" aria-label="Volume Control">
+          <button type="button" className="text-white hover:text-red-500 transition-colors duration-200 hidden sm:block" aria-label="Volume Control">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="28"
