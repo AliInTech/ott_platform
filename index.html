@@ -1,0 +1,337 @@
+import React, { useState, useEffect } from 'react';
+
+// Mock movie data for demonstration
+const mockMovies = [
+  { id: 1, title: 'The Silent Sea', imageUrl: '' },
+  { id: 2, title: 'Beyond the Stars', imageUrl: 'https://placehold.co/300x450/252525/E0E0E0?text=Beyond+Stars' },
+  { id: 3, title: 'Lost in Translation', imageUrl: 'https://placehold.co/300x450/2E2E2E/D1D1D1?text=Lost+in+Translation' },
+  { id: 4, title: 'City of Echoes', imageUrl: 'https://placehold.co/300x450/373737/C2C2C2?text=City+of+Echoes' },
+  { id: 5, title: 'Whispering Pines', imageUrl: 'https://placehold.co/300x450/404040/B3B3B3?text=Whispering+Pines' },
+  { id: 6, title: 'The Last Horizon', imageUrl: 'https://placehold.co/300x450/494949/A4A4A4?text=Last+Horizon' },
+  { id: 7, title: 'Midnight Mirage', imageUrl: 'https://placehold.co/300x450/525252/959595?text=Midnight+Mirage' },
+  { id: 8, title: 'Forgotten Realms', imageUrl: 'https://placehold.co/300x450/5B5B5B/868686?text=Forgotten+Realms' },
+  { id: 9, title: 'The Golden Compass', imageUrl: 'https://placehold.co/300x450/646464/777777?text=Golden+Compass' },
+  { id: 10, title: 'Ocean\'s Depth', imageUrl: 'https://placehold.co/300x450/6D6D6D/686868?text=Ocean\'s+Depth' },
+];
+
+// Reusable MovieCard Component with enhanced hover effects
+const MovieCard = ({ movie }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <div
+      className="flex-shrink-0 w-48 h-auto rounded-lg overflow-hidden relative cursor-pointer shadow-xl
+                 transform transition-transform duration-300 group hover:scale-105 hover:z-10"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      aria-label={`Watch ${movie.title}`}
+    >
+      <img
+        src={movie.imageUrl}
+        alt={movie.title}
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+        onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/300x450/222222/DDDDDD?text=Image+Error"; }}
+      />
+      {/* Overlay visible on hover */}
+      <div className={`absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center p-2 text-center
+                       transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Play Icon */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="56"
+          height="56"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="text-red-500 mb-2 transform group-hover:scale-110 transition-transform duration-200"
+        >
+          <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>
+        <p className="text-white text-lg font-semibold truncate w-full px-1">{movie.title}</p>
+      </div>
+      {/* Movie title always visible at the bottom, even without hover */}
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 via-gray-900/80 to-transparent p-2">
+        <p className="text-sm font-medium truncate text-white">{movie.title}</p>
+      </div>
+    </div>
+  );
+};
+
+// Main App component for MOVIEFLIX
+function App() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+
+  // Simulate progress for the "Now Playing" bar
+  useEffect(() => {
+    let interval;
+    if (isPlaying) {
+      interval = setInterval(() => {
+        setProgress((prev) => (prev >= 100 ? 0 : prev + 0.5)); // Slower, smoother progress
+      }, 100); // Faster updates for smoother animation
+    } else {
+      clearInterval(interval);
+      setProgress(0); // Reset progress when paused
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying]);
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white font-inter">
+      {/* Navigation Bar - fixed at top, slightly transparent to show content underneath */}
+      <nav className="fixed top-0 w-full z-50 p-4 bg-gradient-to-b from-black to-transparent flex items-center justify-between transition-all duration-300">
+        {/* Logo */}
+        <div className="flex items-center space-x-4 md:space-x-8">
+          <h1 className="text-red-600 text-3xl md:text-4xl font-extrabold cursor-pointer tracking-wider">MOVIEFLIX</h1>
+          {/* Nav Links (hidden on small screens, shown on md and above) */}
+          <ul className="hidden md:flex space-x-6 text-lg font-medium">
+            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">Home</a></li>
+            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">TV Shows</a></li>
+            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">Movies</a></li>
+            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">New & Popular</a></li>
+            <li><a href="#" className="hover:text-gray-300 transition-colors duration-200">My List</a></li>
+          </ul>
+        </div>
+        {/* User Actions */}
+        <div className="flex items-center space-x-3 md:space-x-4 text-lg md:text-xl">
+          {/* Search Icon */}
+          <button className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="Search">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-search"
+            >
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+            </svg>
+          </button>
+          {/* User Profile Icon */}
+          <button className="text-white hover:text-gray-300 transition-colors duration-200" aria-label="User Profile">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-user-circle"
+            >
+              <circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/>
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      {/* Hero Section (Banner) */}
+      <header className="relative w-full h-screen flex items-end pb-20 p-8 md:p-16">
+        {/* Background Image/Video Placeholder - now just a solid background */}
+        <img
+          src="https://placehold.co/1920x1080/000000/FFFFFF"
+          alt="Featured Movie Banner Background"
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          onError={(e) => { e.target.onerror = null; e.target.src="https://placehold.co/1920x1080/000000/FFFFFF?text=Banner+Load+Error"; }}
+        />
+        {/* Gradient Overlay for Text Readability and depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/20 to-transparent z-10"></div>
+        <div className="relative z-20 max-w-lg md:max-w-xl lg:max-w-3xl animate-fadeInUp"> {/* Added animation */}
+          <h2 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-4 drop-shadow-lg leading-tight">
+            The MOVIEFLIX Experience
+          </h2>
+          <p className="text-base md:text-xl mb-8 drop-shadow-md text-gray-200">
+            Dive into an endless library of captivating movies and thrilling TV shows. Enjoy personalized recommendations and seamless streaming, all in one cinematic place.
+          </p>
+          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+            <button className="flex items-center justify-center bg-white text-gray-900 px-7 py-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all duration-300 shadow-xl transform hover:scale-105 group">
+              {/* Play Icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="mr-2 text-gray-900 group-hover:text-gray-700 transition-colors"
+              >
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+              Play
+            </button>
+            <button className="flex items-center justify-center bg-gray-700 bg-opacity-70 text-white px-7 py-3 rounded-lg text-lg font-semibold hover:bg-opacity-90 transition-all duration-300 shadow-xl transform hover:scale-105 group">
+              {/* Info Icon */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2 lucide lucide-info text-white group-hover:text-gray-200 transition-colors"
+              >
+                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+              </svg>
+              More Info
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Movie Rows */}
+      <main className="relative z-30 -mt-24 px-4 md:px-16 pb-24">
+        {/* Row 1: Trending Now */}
+        <section className="mb-12">
+          <h3 className="text-xl md:text-2xl font-bold mb-4 pl-2">Trending Now</h3>
+          <div className="flex overflow-x-scroll scrollbar-hide space-x-4 md:space-x-6 pb-4 pt-2">
+            {mockMovies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
+
+        {/* Row 2: Popular on MOVIEFLIX */}
+        <section className="mb-12">
+          <h3 className="text-xl md:text-2xl font-bold mb-4 pl-2">Popular on MOVIEFLIX</h3>
+          <div className="flex overflow-x-scroll scrollbar-hide space-x-4 md:space-x-6 pb-4 pt-2">
+            {mockMovies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
+
+        {/* Row 3: MOVIEFLIX Originals */}
+        <section className="mb-12">
+          <h3 className="text-xl md:text-2xl font-bold mb-4 pl-2">MOVIEFLIX Originals</h3>
+          <div className="flex overflow-x-scroll scrollbar-hide space-x-4 md:space-x-6 pb-4 pt-2">
+            {mockMovies.map((movie) => (
+              <MovieCard key={movie.id} movie={movie} />
+            ))}
+          </div>
+        </section>
+
+        {/* Add more sections as needed */}
+      </main>
+
+      {/* Now Playing Bar (Music Animation Simulation) */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 bg-opacity-95 p-4 flex items-center justify-between shadow-2xl z-50">
+        <div className="flex items-center space-x-4 flex-grow min-w-0">
+          <img
+            src="https://placehold.co/60x60/444444/FFFFFF?text=Current"
+            alt="Now Playing Thumbnail"
+            className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+          />
+          <div className="flex flex-col justify-center flex-grow min-w-0">
+            <p className="text-sm font-semibold truncate">Playing: The Silent Sea</p>
+            <div className="w-full bg-gray-600 rounded-full h-1.5 mt-1 overflow-hidden">
+              <div
+                className="bg-red-600 h-1.5 rounded-full transition-all duration-100 linear" // Smoother progress bar
+                style={{ width: `${progress}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center space-x-4 ml-4">
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="text-white hover:text-red-500 transition-colors duration-200"
+            aria-label={isPlaying ? "Pause Playback" : "Resume Playback"}
+          >
+            {isPlaying ? (
+              // Pause Icon
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <rect width="6" height="16" x="4" y="4" rx="1"/><rect width="6" height="16" x="14" y="4" rx="1"/>
+              </svg>
+            ) : (
+              // Play Icon
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="28"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <polygon points="5 3 19 12 5 21 5 3"/>
+              </svg>
+            )}
+          </button>
+          {/* Volume Icon */}
+          <button className="text-white hover:text-red-500 transition-colors duration-200 hidden sm:block" aria-label="Volume Control">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="lucide lucide-volume-2"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M23.31 1.69a16 16 0 0 1 0 20.62"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-950 p-8 text-center text-gray-500 text-sm">
+        <p>&copy; {new Date().getFullYear()} MOVIEFLIX. All Rights Reserved. This is a clone for educational purposes only.</p>
+        <p className="mt-2">Inspired by Netflix. Layout and design by Laraib Ali (as per request for copyright attribution).</p>
+      </footer>
+
+      {/* Custom CSS for scrollbar hiding and animations */}
+      <style>{`
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+        @keyframes fadeInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeInDown {
+          animation: fadeInDown 0.8s ease-out forwards;
+        }
+        .animate-fadeInUp {
+          animation: fadeInUp 1s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+export default App;
